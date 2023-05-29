@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// 测试参数  -Xjre "D:\Coding\Java\jdk-8u291\jre" java.lang.Object
 func main() {
 	cmd := ch02.ParseCmd()
 	if cmd.VersionFlag {
@@ -20,12 +21,12 @@ func main() {
 
 func startJVM(cmd *ch02.Cmd) {
 	cp := classpath.Parse(cmd.XjreOption, cmd.CpOption)
-	fmt.Printf("classpath: %s class:%s args:%v\n", cmd.CpOption, cmd.Class, cmd.Args)
+	fmt.Printf("classpath:%v class:%v args:%v\n", cp, cmd.Class, cmd.Args)
 	className := strings.Replace(cmd.Class, ".", "/", -1)
 	classData, _, err := cp.ReadClass(className)
 	if err != nil {
 		fmt.Printf("Cloud not find or load class %s\n", cmd.Class)
 		return
 	}
-	fmt.Printf("Class data:%v\n", classData)
+	fmt.Printf("class data:%v\n", classData)
 }
