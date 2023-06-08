@@ -47,11 +47,8 @@ func (this *ClassReader) readUint16s() []uint16 {
 	return result
 }
 
-func (this *ClassReader) readBytes(n uint64) []byte {
+func (this *ClassReader) readBytes(n uint32) []byte {
 	bytes := this.data[:n]
 	this.data = this.data[n:]
 	return bytes
 }
-
-
-

@@ -2,8 +2,6 @@ package classfile
 
 import "fmt"
 
-
-
 /*
 class 字节码组成
 ClassFile {
@@ -40,7 +38,6 @@ type ClassFile struct {
 	methods      []*MemberInfo
 	attributes   []*AttributeInfo
 }
-
 
 func Parse(classData []byte) (cf *ClassFile, err error) {
 	defer func() {
@@ -126,7 +123,3 @@ func (this *ClassFile) readAndCheckVersion(reader *ClassReader) {
 		panic("java.lang.UnsupportedClassVersionError: minorVersion!")
 	}
 }
-
-
-
-
