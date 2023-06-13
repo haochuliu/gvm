@@ -5,7 +5,7 @@ type ConstantStringInfo struct {
 	stringIndex uint16
 }
 
-func (this *ConstantStringInfo) readInfo(reader *ClassReader) string {
+func (this *ConstantStringInfo) readInfo(reader *ClassReader) {
 	this.stringIndex = reader.readUint16()
 }
 

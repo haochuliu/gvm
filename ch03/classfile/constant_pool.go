@@ -1,61 +1,23 @@
 package classfile
 
-type ConstantInfo interface {
-	readInfo(reader *ClassReader)
-}
+import "fmt"
 
 type ConstantPool []ConstantInfo
 
-func readConstantInfo(reader *ClassReader, cp ConstantPool) ConstantInfo {
-	tag := reader.readUint8()
-	c := newConstantInfo(tag, cp)
-	c.readInfo(reader)
-	return c
-}
+func readConstantPool(reader *ClassReader) ConstantPool {
+	cpCount := int(reader.readUint16())
+	cp := make([]ConstantInfo, cpCount)
 
-func newConstantInfo(tag uint8, cp ConstantPool) ConstantInfo {
-	switch tag {
-	case CONSTANT_Integer:
-		return &ConstantIntegerInfo{}
-	case CONSTANT_Float:
-		return &ConstantFloatInfo{}
-	case CONSTANT_Long:
-		return &ConstantLongInfo{}
-	case CONSTANT_Double:
-		return &ConstantDoubleInfo{}
-	case CONSTANT_Utf8:
-		return &ConstantUtf8Info{}
-	case CONSTANT_String:
-		return &ConstantStringInfo{}
-	case CONSTANT_Class:
-		return &ConstantClassInfo{}
-	case CONSTANT_Fieldref:
-		return &ConstantFieldrefInfo{}
-	case CONSTANT_Methodref:
-		return &ConstantMethodrefInfo{}
-	case CONSTANT_InterfaceMethodref:
-		return &ConstantInterfaceMethodrefInfo{}
-	case CONSTANT_NameAndType:
-		return &ConstantNameAndTypeInfo{}
-	case CONSTANT_MethodType:
-		return &ConstantMethodTypeInfo{}
-	case CONSTANT_MethodHandle:
-		return &ConstantMethodHandleInfo{}
-	case CONSTANT_InvokeDynamic:
-		return &ConstantInvokeDynamicInfo{}
-	default:
-		panic("java.lang,ClassFormatError: constant pool tag!")
-	}
-}
-
-func readConstantPool(read *ClassReader) ConstantPool {
-	cpCount := int(read.readUint16())
-	cp := make(ConstantPool, cpCount)
-
+	// The constant_pool table is indexed from 1 to constant_pool_count - 1.
 	for i := 1; i < cpCount; i++ {
 		cp[i] = readConstantInfo(reader, cp)
+		// http://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.4.5
+		// All 8-byte constants take up two entries in the constant_pool table of the class file.
+		// If a CONSTANT_Long_info or CONSTANT_Double_info structure is the item in the constant_pool
+		// table at index n, then the next usable item in the pool is located at index n+2.
+		// The constant_pool index n+1 must be valid but is considered unusable.
 		switch cp[i].(type) {
-		case *ConstantLongInfo, *ConstantDubboInfo:
+		case *ConstantLongInfo, *ConstantDoubleInfo:
 			i++
 		}
 	}
@@ -67,8 +29,7 @@ func (this ConstantPool) getConstantInfo(index uint16) ConstantInfo {
 	if cpInfo := this[index]; cpInfo != nil {
 		return cpInfo
 	}
-
-	panic("Invalid constant pool index!")
+	panic(fmt.Errorf("invalid constant pool index: %v!", index))
 }
 
 func (this ConstantPool) getNameAndType(index uint16) (string, string) {
@@ -80,7 +41,7 @@ func (this ConstantPool) getNameAndType(index uint16) (string, string) {
 
 func (this ConstantPool) getClassName(index uint16) string {
 	classInfo := this.getConstantInfo(index).(*ConstantClassInfo)
-	return classInfo.getUtf8(classInfo.nameIndex)
+	return this.getUtf8(classInfo.nameIndex)
 }
 
 func (this ConstantPool) getUtf8(index uint16) string {

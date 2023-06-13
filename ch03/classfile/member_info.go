@@ -1,14 +1,14 @@
 package classfile
 
 type MemberInfo struct {
-	cp               ContantPool
-	accessFlag       uint16
-	nameIndex        uint16
-	descriptionIndex uint16
-	attributes       []AttributeInfo
+	cp              ConstantPool
+	accessFlags     uint16
+	nameIndex       uint16
+	descriptorIndex uint16
+	attributes      []AttributeInfo
 }
 
-func readMembers(reader *ClassReader, cp ContantPool) []*MemberInfo {
+func readMembers(reader *ClassReader, cp ConstantPool) []*MemberInfo {
 	memberCount := reader.readUint16()
 	members := make([]*MemberInfo, memberCount)
 	for i := range members {
@@ -17,14 +17,22 @@ func readMembers(reader *ClassReader, cp ContantPool) []*MemberInfo {
 	return members
 }
 
-func readMember(reader *ClassReader, cp ContantPool) *MemberInfo {
+func readMember(reader *ClassReader, cp ConstantPool) *MemberInfo {
 	return &MemberInfo{
-		cp:               cp,
-		accessFlag:       reader.readUint16(),
-		nameIndex:        reader.readUint16(),
-		descriptionIndex: reader.readUint16(),
-		attributes:       readAttributes(reader, cp),
+		cp:              cp,
+		accessFlags:     reader.readUint16(),
+		nameIndex:       reader.readUint16(),
+		descriptorIndex: reader.readUint16(),
+		attributes:      readAttributes(reader, cp),
 	}
 }
 
-
+func (this *MemberInfo) AccessFlags() uint16 {
+	return this.accessFlags
+}
+func (this *MemberInfo) Name() string {
+	return this.cp.getUtf8(this.nameIndex)
+}
+func (this *MemberInfo) Descriptor() string {
+	return this.cp.getUtf8(this.descriptorIndex)
+}

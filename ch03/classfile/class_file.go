@@ -36,7 +36,7 @@ type ClassFile struct {
 	interfaces   []uint16
 	fields       []*MemberInfo
 	methods      []*MemberInfo
-	attributes   []*AttributeInfo
+	attributes   []AttributeInfo
 }
 
 func Parse(classData []byte) (cf *ClassFile, err error) {
@@ -63,8 +63,8 @@ func (this *ClassFile) read(reader *ClassReader) {
 	this.thisClass = reader.readUint16()
 	this.superClass = reader.readUint16()
 	this.interfaces = reader.readUint16s()
-	this.fields = readMember(reader, this.constantPool)
-	this.methods = readMember(reader, this.constantPool)
+	this.fields = readMembers(reader, this.constantPool)
+	this.methods = readMembers(reader, this.constantPool)
 	this.attributes = readAttributes(reader, this.constantPool)
 }
 
